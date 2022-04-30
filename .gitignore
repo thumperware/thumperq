@@ -1,0 +1,14 @@
+.vscode/
+.idea/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.sum
+.serverless
+bin
+__debug_bin
+.DS_Store
