@@ -1,3 +1,5 @@
+![alt text](https://github.com/thumperq/thumperq/blob/master/ThumperQ_Logo.png?raw=true)
+
 Thumperq is a light weight and easy to use Go library for RabbitMQ.
 
 # Rquirements
