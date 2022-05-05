@@ -62,11 +62,11 @@ type MyHandler struct {
 }
 
 func NewMyHandler(bus thumperq.IBus) *MyHandler {
-	handler := &MyHandler{
+	myHandler := &MyHandler{
 		bus: bus,
 	}
-	thumperq.CreateConsumer[*MyEvent](bus, handler)
-	return handler
+	thumperq.CreateConsumer[*MyEvent](bus, myHandler)
+	return myHandler
 }
 
 func (h *MyHandler) Handle(msg <-chan handler.HandlerMessage[*MyEvent]) error {
