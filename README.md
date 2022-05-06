@@ -9,7 +9,7 @@ Thumperq is a light weight and easy to use Go library for RabbitMQ.
 ```
 go get github.com/thumperq/thumperq
 or
-go get github.com/thumperq/thumperq@v1.0.0
+go get github.com/thumperq/thumperq@v1.1.0
 ```
 
 # Quick Start
