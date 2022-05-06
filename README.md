@@ -37,6 +37,7 @@ busCfg := thumperqcfg.BusConfig{
 		RmqConnection: "<rmq_connection_string>", // RabbitMQ connection string
 		PropagateContextMetadata: true, // If set to true it'll propagate go contexts metadata in the Bus message
 		RetryCount: 3, // How many retries in case of failure
+		RetryIntervalMs: 2000 // 2 seconds delay in retry executing handler in case of failure
 	}
 ```
 3. Create a bus instance
