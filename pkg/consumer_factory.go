@@ -22,7 +22,7 @@ func CreateConsumer[T handler.IMessage](bus IBus, handler handler.IHandler[T]) {
 	msgPath := reflection.TypePath[T]()
 	if bus.Config().BusConfig().RetryCount <= 0 {
 		firstQueue := queue.NewQueue(bus.Connection(), msgPath, handlerPath)
-		firstConsumer := consumer.NewConsumer(bus.Connection(), handler, firstQueue, nil, errQueue)
+		firstConsumer := consumer.NewConsumer(bus.Connection(), handler, firstQueue, nil, errQueue, 0)
 		err = firstConsumer.Consume()
 		if err != nil {
 			panic(formatter.FormatErr(methodPath, err))
@@ -31,7 +31,7 @@ func CreateConsumer[T handler.IMessage](bus IBus, handler handler.IHandler[T]) {
 	}
 	lastRetryName := fmt.Sprintf("%s_retry%d", handlerPath, bus.Config().BusConfig().RetryCount)
 	lastRetryQueue := queue.NewQueue(bus.Connection(), lastRetryName, lastRetryName)
-	lastRetryConsumer := consumer.NewConsumer(bus.Connection(), handler, lastRetryQueue, nil, errQueue)
+	lastRetryConsumer := consumer.NewConsumer(bus.Connection(), handler, lastRetryQueue, nil, errQueue, bus.Config().BusConfig().RetryIntervalMs)
 	err = lastRetryConsumer.Consume()
 	if err != nil {
 		panic(formatter.FormatErr(methodPath, err))
@@ -40,7 +40,7 @@ func CreateConsumer[T handler.IMessage](bus IBus, handler handler.IHandler[T]) {
 	for i := bus.Config().BusConfig().RetryCount - 1; i >= 1; i-- {
 		retryName := fmt.Sprintf("%s_retry%d", handlerPath, i)
 		retryQueue := queue.NewQueue(bus.Connection(), retryName, retryName)
-		retryConsumer := consumer.NewConsumer(bus.Connection(), handler, retryQueue, nextRetryQueue, errQueue)
+		retryConsumer := consumer.NewConsumer(bus.Connection(), handler, retryQueue, nextRetryQueue, errQueue, bus.Config().BusConfig().RetryIntervalMs)
 		err = retryConsumer.Consume()
 		if err != nil {
 			panic(formatter.FormatErr(methodPath, err))
@@ -48,7 +48,7 @@ func CreateConsumer[T handler.IMessage](bus IBus, handler handler.IHandler[T]) {
 		nextRetryQueue = retryQueue
 		if i == 1 {
 			firstQueue := queue.NewQueue(bus.Connection(), msgPath, handlerPath)
-			firstConsumer := consumer.NewConsumer(bus.Connection(), handler, firstQueue, retryQueue, errQueue)
+			firstConsumer := consumer.NewConsumer(bus.Connection(), handler, firstQueue, retryQueue, errQueue, 0)
 			err = firstConsumer.Consume()
 			if err != nil {
 				panic(formatter.FormatErr(methodPath, err))

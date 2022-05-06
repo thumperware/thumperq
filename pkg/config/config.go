@@ -8,4 +8,5 @@ type BusConfig struct {
 	RmqConnection            string
 	PropagateContextMetadata bool
 	RetryCount               int
+	RetryIntervalMs          int
 }

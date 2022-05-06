@@ -3,6 +3,7 @@ package consumer
 import (
 	"encoding/json"
 	"log"
+	"time"
 
 	"github.com/streadway/amqp"
 	"github.com/thumperq/thumperq/internal/busmessages"
@@ -17,18 +18,20 @@ type iHandlerCommand interface {
 }
 
 type handlerCommand[T handler.IMessage] struct {
-	delivery   amqp.Delivery
-	retryQueue queue.IQueue
-	errorQeueu queue.IQueue
-	handler    handler.IHandler[T]
+	delivery        amqp.Delivery
+	retryQueue      queue.IQueue
+	errorQeueu      queue.IQueue
+	handler         handler.IHandler[T]
+	executeInterval int
 }
 
-func NewHandlerCommand[T handler.IMessage](delivery amqp.Delivery, retryQueue queue.IQueue, errorQueue queue.IQueue, handler handler.IHandler[T]) iHandlerCommand {
+func NewHandlerCommand[T handler.IMessage](delivery amqp.Delivery, retryQueue queue.IQueue, errorQueue queue.IQueue, handler handler.IHandler[T], executeInterval int) iHandlerCommand {
 	return &handlerCommand[T]{
-		delivery:   delivery,
-		retryQueue: retryQueue,
-		errorQeueu: errorQueue,
-		handler:    handler,
+		delivery:        delivery,
+		retryQueue:      retryQueue,
+		errorQeueu:      errorQueue,
+		handler:         handler,
+		executeInterval: executeInterval,
 	}
 }
 
@@ -48,14 +51,16 @@ func (h *handlerCommand[T]) Execute() {
 		consumerMsgStream := make(chan handler.HandlerMessage[T])
 		consumerMsg := handler.NewHandlerMessage(busMsg.Headers, msg)
 		go func() {
-			err = h.handler.Handle(consumerMsgStream)
-			if err != nil {
-				if h.retryQueue != nil {
-					h.retry(h.delivery.Body)
-				} else {
-					h.markError(h.delivery.Body, err)
+			time.AfterFunc(time.Duration(h.executeInterval*int(time.Millisecond)), func() {
+				err = h.handler.Handle(consumerMsgStream)
+				if err != nil {
+					if h.retryQueue != nil {
+						h.retry(h.delivery.Body)
+					} else {
+						h.markError(h.delivery.Body, err)
+					}
 				}
-			}
+			})
 		}()
 		consumerMsgStream <- consumerMsg
 	}()
