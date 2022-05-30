@@ -16,13 +16,13 @@ go get github.com/thumperq/thumperq@v1.1.0
 1. Define your message(aka event)
 ```go
 type MyEvent struct {
-	ID                   string    `json:"id,omitempty"`
+	CorrelationID                   string    `json:"correlationId,omitempty"`
 	Description          string    `json:"description,omitempty"`
 }
 
-func NewMyEvent(id string, description string) *MyEvent{
+func NewMyEvent(correlationId string, description string) *MyEvent{
     return &MyEvent{
-        ID: id,
+        CorrelationID: correlationId,
         Description: description,
     }
 }
@@ -50,7 +50,7 @@ bus := thumperq.NewBus(busCfg)
 ```
 4. Publish a message(aka event)
 ```go
-myEvent := NewMyEvent("1234", "Some description!")
+myEvent := NewMyEvent("e783a086-7d81-4e4b-bd72-325103735bfa", "Some description!")
 err := bus.Publish(ctx, myEvent)
 ```
 5. Subscribe to a message(aka event)
@@ -85,7 +85,7 @@ func (h *MyHandler) Compensate(msg <-chan handler.HandlerMessage[*MyEvent]) {
     busMsg := <-msg
 	// busMsg.Message -> is type of your event(in this example it's of type *MyEvent)
 	// busMsg.Headers -> contains contexts' metadata published by the bus if the PropagateContextMetadata in config is set to true
-	// this is usefule to publish a message to notify other services to compensate the the call. the event id can be used as correlation id to track messages in other services.
+	// this is usefule to publish a message to notify other services to compensate the the call. the event correlation id can be used as to track messages in other services.
 	...
 }
 ```

@@ -3,7 +3,7 @@ package handler
 const HandleMethodName = "Handle"
 
 type IMessage interface {
-	Id() string
+	CorrelationId() string
 }
 
 type IHandler[T IMessage] interface {
