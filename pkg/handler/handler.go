@@ -8,6 +8,7 @@ type IMessage interface {
 
 type IHandler[T IMessage] interface {
 	Handle(msg <-chan HandlerMessage[T]) error
+	Compensate(msg <-chan HandlerMessage[T])
 }
 
 type HandlerMessage[T IMessage] struct {

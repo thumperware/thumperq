@@ -58,6 +58,9 @@ func (h *handlerCommand[T]) Execute() {
 						h.retry(h.delivery.Body)
 					} else {
 						h.markError(h.delivery.Body, err)
+						go func() {
+							h.handler.Compensate(consumerMsgStream)
+						}()
 					}
 				}
 			})
