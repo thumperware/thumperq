@@ -79,3 +79,13 @@ func (h *MyHandler) Handle(msg <-chan handler.HandlerMessage[*MyEvent]) error {
 	...
 }
 ```
+6. Compensate if all retry fails
+```go
+func (h *MyHandler) Compensate(msg <-chan handler.HandlerMessage[*MyEvent]) {
+    busMsg := <-msg
+	// busMsg.Message -> is type of your event(in this example it's of type *MyEvent)
+	// busMsg.Headers -> contains contexts' metadata published by the bus if the PropagateContextMetadata in config is set to true
+	// this is usefule to publish a message to notify other services to compensate the the call. the event id can be used as correlation id to track messages in other services.
+	...
+}
+```
