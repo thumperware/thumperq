@@ -46,13 +46,11 @@ func CreateConsumer[T handler.IMessage](bus IBus, handler handler.IHandler[T]) {
 			panic(formatter.FormatErr(methodPath, err))
 		}
 		nextRetryQueue = retryQueue
-		if i == 1 {
-			firstQueue := queue.NewQueue(bus.Connection(), msgPath, handlerPath)
-			firstConsumer := consumer.NewConsumer(bus.Connection(), handler, firstQueue, retryQueue, errQueue, 0)
-			err = firstConsumer.Consume()
-			if err != nil {
-				panic(formatter.FormatErr(methodPath, err))
-			}
-		}
+	}
+	firstQueue := queue.NewQueue(bus.Connection(), msgPath, handlerPath)
+	firstConsumer := consumer.NewConsumer(bus.Connection(), handler, firstQueue, nextRetryQueue, errQueue, 0)
+	err = firstConsumer.Consume()
+	if err != nil {
+		panic(formatter.FormatErr(methodPath, err))
 	}
 }
