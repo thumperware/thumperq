@@ -96,9 +96,14 @@ func (h *handlerCommand[T]) retry(msgBytes []byte) {
 }
 
 func (h *handlerCommand[T]) compensate(consumerMsg handler.HandlerMessage[T]) {
+	methodPath := reflection.MethodPath(h.compensate)
 	compensateMsgStream := make(chan handler.HandlerMessage[T])
 	go func(consumerMsg handler.HandlerMessage[T]) {
-		h.handler.Compensate(compensateMsgStream)
+		err := h.handler.Compensate(compensateMsgStream)
+		if err != nil {
+			log.Default().Println(formatter.FormatErr(methodPath, err))
+			return
+		}
 	}(consumerMsg)
 	compensateMsgStream <- consumerMsg
 }
